@@ -1,17 +1,19 @@
 import React from "react";
-import Item from "./item";
+import Sticker from "./sticker";
 
 class Board extends React.Component {
 	constructor(props) {
 		super(props);
 
 		this.state = {
-			stickers: []							
+			stickers: []
 		}
 
+		this.createSticker = this.createSticker.bind(this);
 		this.updatePosition = this.updatePosition.bind(this);
 		this.getText = this.getText.bind(this);
 		this.changeText = this.changeText.bind(this);
+		this.deleteSticker = this.deleteSticker.bind(this);
 	}
 
 	componentDidMount(){
@@ -28,26 +30,26 @@ class Board extends React.Component {
 	}
 
 	getX() {
-		let pos = Math.floor( Math.random() * 500 );		
+		let pos = Math.floor( Math.random() * 500 );
 		return pos;
 	}
 
-	createSticker(){			
+	createSticker(){
 		let obj = {
 			header: "I'm a new sticker",
 			date: null,
 			text: null,
-			id: this.generateId(),			
+			id: this.generateId(),
 			pos: {
 				x: this.getX(),
 				y: this.getX(),
 
 				// countX: function() {
-				// 	var x=Math.random() * document.documentElement.clientWidth;						
+				// 	var x=Math.random() * document.documentElement.clientWidth;
 				// 	if(x+200>=document.documentElement.clientWidth) {
 				// 		x-200
 				// 	};	
-				// 	return x;					
+				// 	return x;
 				// },
 				// countY: function(){
 				// 	var y=Math.random() * document.documentElement.clientHeight;
@@ -56,10 +58,16 @@ class Board extends React.Component {
 				// 	}
 				// 	return y;
 				// }
-			},					
+			},
 		};
 		let stickersCopy = this.state.stickers.concat([]);
 		stickersCopy.push(obj);
+		this.setState({stickers: stickersCopy});
+	}
+
+	deleteSticker(index){
+		let stickersCopy = this.state.stickers.concat([]);
+		stickersCopy.splice(index, 1);
 		this.setState({stickers: stickersCopy});
 	}
 
@@ -68,49 +76,50 @@ class Board extends React.Component {
 		arr[index].pos = posObj;
 		this.setState({stickers: arr}, () => {
 			localStorage.notes = JSON.stringify(this.state.stickers);
-			console.log("State from parent component", this.state);
+			// console.log("State from parent component", this.state);
 		});
 	}
 
 	getText(text, index){
 		let arr = this.state.stickers.concat([]);
 		if(text){
-			arr[index].text = text;	
+			arr[index].text = text;
 			arr[index].display = "none";
 		}
 
 		this.setState({stickers: arr}, function(){
 			localStorage.notes = JSON.stringify(this.state.stickers);
 			console.log(localStorage.notes);
-		}); ///change textarea of stickers	
+		}); ///change textarea of stickers
 	}
 
 	changeText(index){
 		let arr = this.state.stickers.concat([]);
-		arr[index].display = !this.state.display;		
+		arr[index].display = !this.state.display;
 		this.setState({stickers: arr});
 	}
 
-	render() {		
+	render() {
 
 		let stickerList=this.state.stickers.map((item,index) => {
-			return(<Item 
-				key={item.id} 
-				itemIndex={index} 
-				header={item.header} 				
-				text={item.text} 
-				getText={this.getText}	
-				display={item.display}						
+			return( <Sticker 
+				key={item.id}
+				itemIndex={index}
+				header={item.header}
+				text={item.text}
+				getText={this.getText}
+				display={item.display}
 				pos={item.pos}
 				change={this.changeText}
 				updatePosition={this.updatePosition}
-				/>)
+				remove={this.deleteSticker}
+				/> )
 
 		});
 
 		return (
 			<div className="board">
-				<div className="button" onClick={this.createSticker.bind(this)}>+</div>
+				<div className="button" onClick={this.createSticker}>+</div>
 				{stickerList}
 			</div>
 			)
